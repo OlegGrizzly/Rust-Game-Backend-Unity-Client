@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "com.gamebackend.sdk": "file:../../com.gamebackend.sdk",
+    "com.unity.ide.rider": "3.0.39",
+    "com.unity.test-framework": "1.6.0",
+    "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0"
+  },
+  "testables": [
+    "com.gamebackend.sdk"
+  ]
+}
