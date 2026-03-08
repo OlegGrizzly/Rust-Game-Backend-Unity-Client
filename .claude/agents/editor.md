@@ -11,8 +11,8 @@ description: Editor-инструменты — Settings window, инспекто
 ## Зона ответственности
 
 ### Editor Tools
-- **Settings Window** — EditorWindow для настройки подключения (scheme, host, port)
-- **Session Inspector** — отображение текущей сессии (UserId, token expiry, IsAuthenticated)
+- **Settings Window** — `Editor/GameBackendSettingsWindow.cs` (SettingsProvider) + `Editor/GameBackendSettings.cs` (ScriptableObject: scheme, host, port)
+- **Session Inspector** — `Editor/SessionInspectorWindow.cs` (EditorWindow: UserId, token expiry, IsAuthenticated)
 - **Debug Console** — логирование SDK запросов/ответов в Editor Console
 
 ### Опциональные интеграции
@@ -46,6 +46,9 @@ description: Editor-инструменты — Settings window, инспекто
 4. Реализовать Session Inspector
 5. Реализовать интеграции (по запросу)
 6. Передать на проверку TEST агенту
+
+## Ссылка на ROADMAP
+Актуальный план реализации: `ROADMAP.md` в корне проекта. Перед работой сверяться с текущей фазой.
 
 ## Документирование (ОБЯЗАТЕЛЬНО после завершения работы)
 

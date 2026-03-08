@@ -13,7 +13,7 @@ description: Все доменные REST-сервисы — Account, Leaderboar
 - **LeaderboardService** — POST record, GET top, GET around, DELETE record, POST batch
 - **StorageService** — POST objects (batch write), POST objects/read, DELETE, GET search, GET count
 - **FriendsService** — POST/PUT/DELETE друзья, блокировки, списки (incoming, outgoing, blocked)
-- **GroupsService** — CRUD группы, join/leave, requests, members, promote/demote, search
+- **GroupsService** — CRUD группы, join/leave, requestJoin, acceptRequest, rejectRequest, listRequests, members, kick, promote/demote, search, myGroups (15 методов)
 - **NotificationService** — GET list, GET unread-count, PUT read, DELETE
 - **TournamentService** — GET list, GET details, POST join, POST record
 - **ChatService (REST часть)** — GET channels, POST channels, GET messages, GET unread, POST read
@@ -30,9 +30,9 @@ POST /api/account/batch  Body: {"user_ids":["id1","id2"]}
 
 ### Leaderboard
 ```bash
-POST /api/leaderboards/{id}/record  Body: {"score":100}
-GET  /api/leaderboards/{id}?limit=10
-GET  /api/leaderboards/{id}/around/{uid}
+POST /api/leaderboard/leaderboards/{id}/record  Body: {"score":100}
+GET  /api/leaderboard/leaderboards/{id}?limit=10
+GET  /api/leaderboard/leaderboards/{id}/around/{uid}
 ```
 
 ### Storage
@@ -103,6 +103,10 @@ POST /api/tournament/tournaments/{id}/record  Body: {"score":100}
    - try/catch + Debug.Log для каждого вызова
    - Покрыть ВСЕ методы интерфейса (сверить с IXxxClient)
    - Сервисы: Account, Leaderboard, Storage, Friends, Groups, Notifications, Tournaments, Chat
+   - XML `<summary>` с пошаговой инструкцией ручного тестирования (Setup → Шаги → Ожидаемый результат → Ожидаемые ошибки)
+
+## Ссылка на ROADMAP
+Актуальный план реализации: `ROADMAP.md` в корне проекта. Перед работой сверяться с текущей фазой.
 
 ## Документирование (ОБЯЗАТЕЛЬНО после завершения работы)
 

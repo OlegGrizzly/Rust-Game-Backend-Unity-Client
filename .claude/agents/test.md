@@ -66,6 +66,33 @@ ssh -i $VPS_SSH_KEY_PATH -p $VPS_PORT $VPS_USER@$VPS_HOST "curl -s ..."
 - `com.gamebackend.sdk/Tests/Runtime/` — runtime тесты
 - `com.gamebackend.sdk/Tests/Editor/` — editor тесты
 
+## E2E тестирование через MCP Unity
+
+После каждой фазы проводить E2E проверку:
+
+| Phase | E2E сценарий |
+|-------|-------------|
+| 0 | `read_console` — 0 ошибок компиляции |
+| 1 | `run_tests` EditMode — тесты десериализации моделей Green |
+| 2 | `run_tests` EditMode — Auth тесты Green. E2E: GameClient → RegisterUsername → Session.UserId != null → Logout |
+| 3 | `run_tests` EditMode — Account + Leaderboard. E2E: Login → GetAccount → WriteLeaderboardRecord → ListLeaderboardRecords |
+| 4 | `run_tests` EditMode + PlayMode — WS тесты. E2E: Login → NewSocket → Connect → SendChatMessage → ReceivedChatMessage |
+| 5 | `run_tests` EditMode — все ~114 тестов Green. E2E: Storage, Friends, Groups полный цикл |
+| 6 | `run_tests` EditMode — все тесты Green. Проверить Settings window |
+
+**Процедура E2E:**
+1. `read_console` — 0 ошибок компиляции
+2. `run_tests` с `test_mode: "EditMode"` — все unit-тесты зелёные
+3. Через MCP Unity: GameObject с Sample → [ContextMenu] методы → Debug.Log через `read_console`
+
+## Верификация Examples
+- Проверить что КАЖДЫЙ Sample содержит XML `<summary>` с пошаговой инструкцией ручного тестирования
+- Формат: Setup → Шаги → Ожидаемый результат → Ожидаемые ошибки
+- Сверить количество [ContextMenu] методов с IXxxClient
+
+## Ссылка на ROADMAP
+Актуальный план реализации: `ROADMAP.md` в корне проекта. Перед работой сверяться с текущей фазой.
+
 ## Что НЕ делать
 - Не писать реализацию — только тесты
 - Не менять интерфейсы — это CORE агент

@@ -10,7 +10,8 @@ description: WebSocket клиент — подключение, heartbeat, recon
 
 ## Зона ответственности
 - **GameSocket** — реализация IGameSocket: подключение, отключение, отправка сообщений, C# events для входящих событий
-- **MessageDispatcher** — парсинг JSON frames `{"type":"...","data":{...}}`, роутинг по `type` в нужный event
+- **WebSocketMessageDispatcher** — парсинг JSON frames `{"type":"...","data":{...}}`, роутинг по `type` в нужный event
+- **HeartbeatManager** — ping каждые 30с, pong timeout 10с, signal disconnect при отсутствии pong
 - **ReconnectHandler** — exponential backoff (1с→2с→4с→8с→...→30с max), auto-refresh токена при reconnect
 
 ### WebSocket endpoint
@@ -68,7 +69,7 @@ WSS wss://{host}/ws?token={access_token}  (production)
 7. **Формат сообщений** — JSON frame с обязательным `type`. `data` опционален (ping, pong).
 
 ## Рабочие директории
-- `com.gamebackend.sdk/Runtime/WebSocket/` — GameSocket.cs, MessageDispatcher.cs, ReconnectHandler.cs
+- `com.gamebackend.sdk/Runtime/WebSocket/` — GameSocket.cs, WebSocketMessageDispatcher.cs, HeartbeatManager.cs, ReconnectHandler.cs
 
 ## Что НЕ делать
 - Не реализовывать REST API — это REST агент
@@ -89,6 +90,10 @@ WSS wss://{host}/ws?token={access_token}  (production)
    - Подписка на ВСЕ C# events (ReceivedChatMessage, ReceivedPresenceUpdate и др.) с логированием в Console
    - `[SerializeField]` для host/port и тестовых данных (channel_id, user_id, message)
    - `[TextArea] lastResult` + `[TextArea] lastEvent` для отображения в Inspector
+   - XML `<summary>` с пошаговой инструкцией ручного тестирования (Setup → Шаги → Ожидаемый результат → Ожидаемые ошибки)
+
+## Ссылка на ROADMAP
+Актуальный план реализации: `ROADMAP.md` в корне проекта. Перед работой сверяться с текущей фазой.
 
 ## Документирование (ОБЯЗАТЕЛЬНО после завершения работы)
 

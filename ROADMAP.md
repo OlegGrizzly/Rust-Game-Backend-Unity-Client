@@ -40,13 +40,13 @@
 ### CORE создает контракты:
 
 **Интерфейсы** (`Runtime/Core/Interfaces/`):
-- `IAuthClient.cs` — 8 методов (3 register + 3 login + refresh + logout)
+- `IAuthClient.cs` — 12 методов (3 register + 3 login + refresh + logout + listSessions + revokeSession + linkProvider + unlinkProvider)
 - `IAccountClient.cs` — 5 методов (get/update/delete account, get user, batch)
 - `ILeaderboardClient.cs` — 5 методов (write/list/around/delete/batch)
 - `IChatClient.cs` — 5 методов (channels, messages, unread, mark read)
 - `IStorageClient.cs` — 5 методов (write/read/delete/search/count)
 - `IFriendsClient.cs` — 10 методов (add/accept/reject/remove/block/unblock + lists)
-- `IGroupsClient.cs` — 14 методов (CRUD + join/leave/members/roles/search)
+- `IGroupsClient.cs` — 15 методов (CRUD + join/requestJoin/acceptRequest/rejectRequest/listRequests/kick/promote/demote/leave/members/search/myGroups)
 - `INotificationClient.cs` — 4 метода (list/unread/read/delete)
 - `ITournamentClient.cs` — 4 метода (list/get/join/record)
 - `IGameClient.cs` — фасад (наследует все 9 + Session, RestoreSession, ClearSession, NewSocket)
@@ -71,7 +71,7 @@
 ### TEST пишет тесты Auth:
 - `Tests/Editor/Mocks/MockHttpAdapter.cs` — очередь ответов
 - `Tests/Editor/Mocks/MockTokenStorage.cs` — in-memory
-- `Tests/Editor/Auth/AuthServiceTests.cs` — ~12 тестов (register 3 провайдера, login, refresh, logout, 401/403)
+- `Tests/Editor/Auth/AuthServiceTests.cs` — ~18 тестов (register 3 провайдера, login, refresh, logout, listSessions, revokeSession, linkProvider, unlinkProvider, 401/403)
 - `Tests/Editor/Auth/GameSessionTests.cs` — ~6 тестов (JWT decode, IsExpired)
 
 ### CORE создает адаптеры:
@@ -157,7 +157,7 @@
 |-------|--------|---------------------|
 | Storage | ~8 | Batch read/write, optimistic locking (version) |
 | Friends | ~12 | 10 методов, mutual pending auto-accept |
-| Groups | ~14 | create/send chat НЕ safe-to-retry, роли |
+| Groups | ~15 | create/send chat НЕ safe-to-retry, роли, listRequests |
 | Notifications | ~6 | Пагинация, mark read |
 | Tournaments | ~6 | join, record, 409 already joined |
 
@@ -185,14 +185,14 @@
 
 | Phase | Sample | Методы с [ContextMenu] |
 |-------|--------|----------------------|
-| 2 | `Samples/Auth/AuthExample.cs` | RegisterUsername, RegisterEmail, RegisterDevice, LoginUsername, LoginEmail, LoginDevice, Refresh, Logout |
+| 2 | `Samples/Auth/AuthExample.cs` | RegisterUsername, RegisterEmail, RegisterDevice, LoginUsername, LoginEmail, LoginDevice, Refresh, Logout, ListSessions, RevokeSession, LinkProvider, UnlinkProvider |
 | 3 | `Samples/Account/AccountExample.cs` | GetMyAccount, UpdateDisplayName, DeleteAccount, GetUserById, GetUsersBatch |
 | 3 | `Samples/Leaderboard/LeaderboardExample.cs` | SubmitScore, GetTopScores, GetAroundMe, DeleteMyRecord |
 | 4 | `Samples/Chat/ChatExample.cs` | ListChannels, CreateChannel, GetMessages, GetUnread, MarkRead |
 | 4 | `Samples/WebSocket/WebSocketExample.cs` | Connect, Disconnect, SendMessage, JoinChannel, LeaveChannel, SetPresence |
 | 5 | `Samples/Storage/StorageExample.cs` | WriteObjects, ReadObjects, DeleteObject, Search, GetCount |
 | 5 | `Samples/Friends/FriendsExample.cs` | SendRequest, AcceptRequest, RejectRequest, RemoveFriend, Block, Unblock, ListFriends, ListIncoming, ListOutgoing, ListBlocked |
-| 5 | `Samples/Groups/GroupsExample.cs` | CreateGroup, UpdateGroup, DeleteGroup, JoinGroup, RequestJoin, AcceptRequest, RejectRequest, KickMember, PromoteMember, DemoteMember, LeaveGroup, ListMembers, SearchGroups, ListMyGroups |
+| 5 | `Samples/Groups/GroupsExample.cs` | CreateGroup, UpdateGroup, DeleteGroup, JoinGroup, RequestJoin, AcceptRequest, RejectRequest, ListRequests, KickMember, PromoteMember, DemoteMember, LeaveGroup, ListMembers, SearchGroups, ListMyGroups |
 | 5 | `Samples/Notifications/NotificationsExample.cs` | ListNotifications, GetUnreadCount, MarkAsRead, DeleteNotification |
 | 5 | `Samples/Tournaments/TournamentsExample.cs` | ListTournaments, GetTournament, JoinTournament, SubmitRecord |
 
@@ -237,9 +237,116 @@
 
 ---
 
+## Clean Architecture + SOLID
+
+### Dependency Rule (зависимости только внутрь)
+
+```
+Core  ←──  Transport  ←──  Api
+                       ←──  WebSocket
+```
+
+- **Core** НЕ знает о Transport, Api, WebSocket
+- **Transport** НЕ знает об Api и WebSocket
+- **Api** и **WebSocket** НЕ знают друг о друге
+- Циклические зависимости запрещены
+
+### Границы слоёв через интерфейсы
+
+- Core определяет контракты (IHttpAdapter, ISerializer, ITokenStorage)
+- Transport реализует контракты
+- Api и WebSocket используют только абстракции из Core/Transport
+- Конкретные реализации инжектятся снаружи (DIP)
+
+### Core — ядро без внешних зависимостей
+
+- `noEngineReferences: true` — Core не зависит от UnityEngine
+- Только Newtonsoft.Json для атрибутов моделей
+- Можно использовать в не-Unity проектах (.NET)
+
+### Расширяемость без модификации (OCP)
+
+- Новый REST сервис = новый файл + новый интерфейс, **ноль изменений** в существующих сервисах
+- Новый транспорт (кастомный HTTP) = новая реализация IHttpAdapter
+- Новая платформа хранения = новая реализация ITokenStorage
+- Новый WS event = добавить case в dispatcher, не трогая существующие
+
+### Тестируемость
+
+- Мокаем только границу слоёв (IHttpAdapter, IWebSocketAdapter)
+- Тесты проверяют весь стек через границу: сериализация → pipeline → сервис → десериализация
+- Core тестируется без Unity (noEngineReferences)
+
+### SOLID
+
+- **SRP**: Каждый сервис отвечает за один домен (AuthService — только auth, AccountService — только account). HttpPipeline отвечает только за HTTP механику, TokenManager — только за токены.
+- **OCP**: Новые доменные сервисы добавляются без изменения существующих. Pipeline расширяется middleware без модификации ядра.
+- **LSP**: Все реализации IHttpAdapter (UnityWebRequestAdapter, MockHttpAdapter) взаимозаменяемы. GameClient реализует IGameClient без нарушения контракта.
+- **ISP**: 9 отдельных доменных интерфейсов вместо одного монолитного. Gameplay-код инжектит `ILeaderboardClient`, а не весь `IGameClient`.
+- **DIP**: Сервисы зависят от абстракций (IHttpAdapter, ISerializer, ITokenStorage), а не от конкретных реализаций. Позволяет подменять транспорт для тестов и разных платформ.
+
+---
+
+## E2E тестирование через MCP Unity
+
+После каждой фазы TEST агент проводит E2E проверку через MCP Unity:
+
+| Phase | E2E сценарий |
+|-------|-------------|
+| 0 | `read_console` — 0 ошибок компиляции |
+| 1 | `run_tests` EditMode — тесты десериализации моделей Green |
+| 2 | `run_tests` EditMode — Auth тесты Green. E2E: создать GameClient → RegisterUsername → проверить Session.UserId != null → Logout |
+| 3 | `run_tests` EditMode — Account + Leaderboard тесты Green. E2E: Login → GetAccount → UpdateAccount(displayName) → WriteLeaderboardRecord → ListLeaderboardRecords → проверить score |
+| 4 | `run_tests` EditMode + PlayMode — WS тесты Green. E2E: Login → NewSocket → Connect → JoinChannel → SendChatMessage → проверить ReceivedChatMessage event → Close |
+| 5 | `run_tests` EditMode — все ~114 тестов Green. E2E: полный цикл Storage (write→read→delete), Friends (add→accept→list→remove), Groups (create→join→leave→delete) |
+| 6 | `run_tests` EditMode — все тесты Green. Проверить Settings window открывается, значения сохраняются |
+
+**Процедура E2E:**
+1. `read_console` — убедиться 0 ошибок компиляции
+2. `run_tests` с `test_mode: "EditMode"` — все unit-тесты зелёные
+3. Через MCP Unity: создать GameObject с Sample компонентом, вызвать [ContextMenu] методы, проверить Debug.Log вывод через `read_console`
+
+---
+
+## Инструкции ручного тестирования для Examples
+
+Каждый Sample файл содержит в шапке XML-комментарий `<summary>` с пошаговой инструкцией ручного тестирования:
+
+```csharp
+/// <summary>
+/// Auth Example — ручное тестирование аутентификации.
+///
+/// Инструкция:
+/// 1. Создайте пустой GameObject в сцене
+/// 2. Добавьте компонент AuthExample
+/// 3. В Inspector задайте Host, Port (или оставьте по умолчанию)
+/// 4. Правый клик на компоненте → GameBackend → RegisterUsername
+/// 5. Проверьте Console: "Registered as {userId}"
+/// 6. Правый клик → GameBackend → ListSessions — должна показать 1 сессию
+/// 7. Правый клик → GameBackend → Logout — "Logged out"
+///
+/// Ожидаемые ошибки:
+/// - "401 Unauthorized" при вызове методов без авторизации
+/// - "409 Conflict" при повторной регистрации того же username
+/// </summary>
+```
+
+Формат единый для всех 10 Samples:
+1. **Setup** — как добавить компонент в сцену
+2. **Шаги** — порядок вызова [ContextMenu] методов
+3. **Ожидаемый результат** — что должно появиться в Console
+4. **Ожидаемые ошибки** — какие ошибки нормальны в определённых сценариях
+
+Дополнительно в `Samples/_Shared/TESTING.md` — общая инструкция:
+- Как настроить подключение к бэкенду
+- Как импортировать Samples через Package Manager
+- Порядок тестирования (Auth → Account → Leaderboard → Chat → WS → Storage → Friends → Groups → Notifications → Tournaments)
+
+---
+
 ## Верификация
 
-- После каждой фазы: `run_tests` через MCP Unity (EditMode)
+- После каждого изменения .cs: `read_console` через MCP Unity на ошибки компиляции
+- После каждой фазы: E2E тестирование (см. таблицу выше)
 - После Phase 2: curl к реальному бэкенду через SSH на VPS
-- После Phase 4: ручная проверка WebSocket подключения
-- `read_console` после каждого изменения .cs файлов
+- После Phase 4: ручная проверка WebSocket подключения через Sample
