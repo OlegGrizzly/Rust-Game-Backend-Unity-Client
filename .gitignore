@@ -55,3 +55,6 @@ PackageSampleProject/Logs
 PackageSampleProject/Temp
 PackageSampleProject/UserSettings
 PackageSampleProject/Library
+
+# Claude Code local settings
+.claude/settings.local.json

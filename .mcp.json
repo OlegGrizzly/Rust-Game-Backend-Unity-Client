@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "UnityMCP": {
+      "type": "stdio",
+      "command": "/Users/olegsedyh/.local/bin/uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/CoplayDev/unity-mcp",
+        "mcp-for-unity",
+        "--transport",
+        "stdio",
+        "--http-url",
+        "http://localhost:6500"
+      ],
+      "env": {}
+    }
+  }
+}
