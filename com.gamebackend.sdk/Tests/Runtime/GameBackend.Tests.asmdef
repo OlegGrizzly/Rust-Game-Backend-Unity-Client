@@ -2,7 +2,9 @@
     "name": "GameBackend.Tests",
     "references": [
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "GameBackend",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

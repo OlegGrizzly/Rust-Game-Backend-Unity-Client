@@ -1,6 +1,10 @@
 {
     "name": "GameBackend",
-    "references": [],
+    "references": [
+        "UniTask",
+        "Unity.Newtonsoft.Json",
+        "NativeWebSocket"
+    ],
     "includePlatforms": [],
     "excludePlatforms": []
 }

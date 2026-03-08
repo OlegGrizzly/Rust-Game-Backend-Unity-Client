@@ -10,11 +10,28 @@
       },
       "hash": "f130dcb739cff2d72da2098078197de928b6d808"
     },
+    "com.cysharp.unitask": {
+      "version": "2.5.10",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.endel.nativewebsocket": {
+      "version": "https://github.com/endel/NativeWebSocket.git#upm",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "ea014c9ae534d56111962d96f89f8a046e302dc9"
+    },
     "com.gamebackend.sdk": {
       "version": "file:../../com.gamebackend.sdk",
       "depth": 0,
       "source": "local",
-      "dependencies": {}
+      "dependencies": {
+        "com.cysharp.unitask": "2.5.10",
+        "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm"
+      }
     },
     "com.unity.ext.nunit": {
       "version": "2.0.5",

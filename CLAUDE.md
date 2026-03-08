@@ -6,7 +6,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Unity SDK клиент для микросервисного игрового бэкенда на Rust (Axum + Tonic gRPC). SDK — низкоуровневый транспортный слой: HTTP запросы к REST API, WebSocket соединение, управление JWT токенами (auto-refresh), retry с backoff. SDK НЕ содержит UI, игровую логику, кэширование или state management.
 
-Бэкенд-проект расположен в `/Users/olegsedyh/Unity Projects/Rust-Game-Backend`. Спецификация SDK: `docs/sdk/unity-sdk-readme.md`, протокол: `docs/sdk/client-protocol.md`, REST API: `docs/api/rest.md`, WebSocket API: `docs/api/websocket.md`.
+Бэкенд-проект: `/Users/olegsedyh/Unity Projects/Rust-Game-Backend`. Спецификации в бэкенд-проекте: `docs/sdk/unity-sdk-readme.md`, `docs/sdk/client-protocol.md`, `docs/api/rest.md`, `docs/api/websocket.md`.
+
+## Команды и тестирование
+
+SDK — Unity-пакет, сборка и тесты запускаются через Unity Editor или MCP Unity:
+
+- **Компиляция**: после изменения .cs файлов проверять `read_console` через MCP Unity на ошибки компиляции
+- **Тесты (MCP Unity)**: `run_tests` с `test_mode: "EditMode"` или `"PlayMode"`, можно фильтровать по `test_filter`
+- **Тесты (CLI)**: `unity -runTests -testPlatform EditMode -projectPath PackageSampleProject -testResults results.xml`
+- **Единичный тест**: `run_tests` с `test_filter: "ClassName.MethodName"`
+
+Тесты лежат в `com.gamebackend.sdk/Tests/Runtime/` (PlayMode) и `com.gamebackend.sdk/Tests/Editor/` (EditMode). Для обнаружения тестов пакет должен быть указан в `testables` в `PackageSampleProject/Packages/manifest.json`.
+
+## Структура репозитория
+
+```
+com.gamebackend.sdk/           — Unity-пакет (основной код)
+  Runtime/                     — Runtime-код (GameBackend.asmdef)
+  Editor/                      — Editor-код (GameBackend.Editor.asmdef)
+  Tests/Runtime/               — Runtime-тесты (GameBackend.Tests.asmdef)
+  Tests/Editor/                — Editor-тесты (GameBackend.Editor.Tests.asmdef)
+  Samples/                     — Примеры использования
+PackageSampleProject/          — Unity-проект для разработки/тестирования пакета
+  Packages/manifest.json       — подключение пакета через file: ссылку
+```
 
 ## Стек технологий
 
@@ -17,6 +41,8 @@ Unity SDK клиент для микросервисного игрового б
 - **Опциональные**: VContainer (DI), R3 (Reactive), MessagePipe (Pub/Sub)
 
 ## Архитектура SDK (4 слоя, каждый = отдельный .asmdef)
+
+**Текущее состояние**: пакет содержит шаблонные asmdef (`GameBackend`, `GameBackend.Editor`, `GameBackend.Tests`, `GameBackend.Editor.Tests`). Разделение на 4 слоя ниже — целевая архитектура, которую нужно реализовать.
 
 ```
 GameBackend.Core       — интерфейсы, модели, контракты (зависит только от Newtonsoft)
@@ -76,3 +102,24 @@ GameBackend.WebSocket  — WS клиент (GameSocket, ReconnectHandler, heartb
 - Сессия хранится внутри `GameClient` — методы не принимают IGameSession
 - `GameClient` создаётся через `new GameClient(scheme, host, port)` или через VContainer DI
 - Токены автоматически сохраняются/загружаются через `ITokenStorage` (по умолчанию PlayerPrefs)
+
+## TDD-подход
+
+Разработка ведётся по TDD: сначала TEST агент пишет тесты на основе спецификации и curl-проверки endpoint-ов, затем реализующий агент пишет код пока тесты не станут зелёными. После реализации — проверка через MCP Unity.
+
+Цикл: `curl-проверка → тесты (Red) → контракты (компилируется, падает) → реализация (Green) → рефакторинг → MCP-проверка`
+
+## Агенты
+
+В `.claude/agents/` лежат 6 специализированных субагентов:
+
+| Агент | Файл | Зона ответственности |
+|-------|------|---------------------|
+| CORE | core.md | Интерфейсы, модели, адаптеры транспорта |
+| AUTH | auth.md | Аутентификация, JWT, TokenManager, HttpPipeline |
+| REST | rest.md | Доменные REST-сервисы (Account, Leaderboard, Storage, Friends, Groups, Notifications, Tournaments) |
+| WS | ws.md | WebSocket клиент, heartbeat, reconnect, события |
+| TEST | test.md | TDD-драйвер: curl-проверка, тесты ДО кода, MCP Unity верификация |
+| EDITOR | editor.md | Editor tools, Settings window, интеграции (VContainer, R3, MessagePipe) |
+
+Порядок реализации: `CORE → AUTH → REST + WS (параллельно) → EDITOR`. TEST агент работает параллельно со всеми как драйвер TDD.

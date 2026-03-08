@@ -4,7 +4,10 @@
   "version": "0.1.0",
   "unity": "2021.3",
   "description": "Unity SDK for Rust-Game-Backend.",
-  "dependencies": {},
+  "dependencies": {
+    "com.cysharp.unitask": "2.5.10",
+    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm"
+  },
   "keywords": [
     "game-backend",
     "sdk",
@@ -14,5 +17,57 @@
   "license": "MIT",
   "author": {
     "name": "Game Backend"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "Auth Example",
+      "description": "Registration, login, refresh, logout with all providers",
+      "path": "Samples/Auth"
+    },
+    {
+      "displayName": "Account Example",
+      "description": "Profile management: get, update, batch, delete",
+      "path": "Samples/Account"
+    },
+    {
+      "displayName": "Leaderboard Example",
+      "description": "Submit scores, get top players, around me",
+      "path": "Samples/Leaderboard"
+    },
+    {
+      "displayName": "Chat Example",
+      "description": "Channels, messages, unread counts",
+      "path": "Samples/Chat"
+    },
+    {
+      "displayName": "Storage Example",
+      "description": "Key-value storage: batch read/write, search",
+      "path": "Samples/Storage"
+    },
+    {
+      "displayName": "Friends Example",
+      "description": "Friend requests, blocking, lists",
+      "path": "Samples/Friends"
+    },
+    {
+      "displayName": "Groups Example",
+      "description": "Clans: create, join, roles, search",
+      "path": "Samples/Groups"
+    },
+    {
+      "displayName": "Notifications Example",
+      "description": "Notifications: list, unread count, mark read",
+      "path": "Samples/Notifications"
+    },
+    {
+      "displayName": "Tournaments Example",
+      "description": "Tournament list, join, submit results",
+      "path": "Samples/Tournaments"
+    },
+    {
+      "displayName": "WebSocket Example",
+      "description": "Real-time: chat, presence, server events",
+      "path": "Samples/WebSocket"
+    }
+  ]
 }
