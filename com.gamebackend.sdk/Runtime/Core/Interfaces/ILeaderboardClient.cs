@@ -7,7 +7,9 @@ namespace GameBackend.Core.Interfaces
 {
     public interface ILeaderboardClient
     {
-        UniTask WriteLeaderboardRecordAsync(string leaderboardId, long score, CancellationToken ct = default);
+        UniTask WriteLeaderboardRecordAsync(string leaderboardId, long score,
+            long subscore = 0, Dictionary<string, object> metadata = null,
+            CancellationToken ct = default);
         UniTask<LeaderboardRecordList> ListLeaderboardRecordsAsync(string leaderboardId, int limit = 10, CancellationToken ct = default);
         UniTask<LeaderboardRecordList> ListLeaderboardRecordsAroundUserAsync(string leaderboardId, string userId, CancellationToken ct = default);
         UniTask DeleteLeaderboardRecordAsync(string leaderboardId, CancellationToken ct = default);

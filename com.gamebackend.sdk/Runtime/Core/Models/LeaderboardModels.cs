@@ -6,14 +6,14 @@ namespace GameBackend.Core.Models
 {
     public class LeaderboardRecord
     {
+        [JsonProperty("leaderboard_id")]
+        public string LeaderboardId;
+
         [JsonProperty("rank")]
         public long Rank;
 
         [JsonProperty("user_id")]
         public string UserId;
-
-        [JsonProperty("username")]
-        public string Username;
 
         [JsonProperty("score")]
         public long Score;
@@ -21,11 +21,11 @@ namespace GameBackend.Core.Models
         [JsonProperty("subscore")]
         public long Subscore;
 
-        [JsonProperty("num_score")]
-        public int NumScore;
-
         [JsonProperty("metadata")]
         public Dictionary<string, object> Metadata;
+
+        [JsonProperty("created_at")]
+        public DateTime CreatedAt;
 
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt;

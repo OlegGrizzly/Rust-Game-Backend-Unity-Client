@@ -21,6 +21,8 @@ namespace GameBackend.Api
         private readonly TokenManager _tokenManager;
         private readonly HttpPipeline _pipeline;
         private readonly AuthService _authService;
+        private readonly AccountService _accountService;
+        private readonly LeaderboardService _leaderboardService;
 
         public IGameSession Session => _tokenManager.CurrentSession;
         public bool IsAuthenticated => _tokenManager.CurrentSession != null && !_tokenManager.CurrentSession.IsExpired;
@@ -39,6 +41,8 @@ namespace GameBackend.Api
             _tokenManager = new TokenManager(serializer, tokenStorage);
             _pipeline = new HttpPipeline(httpAdapter, serializer, _tokenManager);
             _authService = new AuthService(_pipeline, _tokenManager, baseUrl);
+            _accountService = new AccountService(_pipeline, baseUrl);
+            _leaderboardService = new LeaderboardService(_pipeline, baseUrl);
         }
 
         // =====================================================================
@@ -109,39 +113,41 @@ namespace GameBackend.Api
         // =====================================================================
 
         public UniTask<Account> GetAccountAsync(CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _accountService.GetAccountAsync(ct);
 
         public UniTask UpdateAccountAsync(string displayName = null, string avatarUrl = null,
             string lang = null, string location = null, string timezone = null, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _accountService.UpdateAccountAsync(displayName, avatarUrl, lang, location, timezone, ct);
 
         public UniTask DeleteAccountAsync(CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _accountService.DeleteAccountAsync(ct);
 
         public UniTask<User> GetUserAsync(string userId, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _accountService.GetUserAsync(userId, ct);
 
         public UniTask<IEnumerable<User>> GetUsersAsync(IEnumerable<string> userIds, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _accountService.GetUsersAsync(userIds, ct);
 
         // =====================================================================
         // ILeaderboardClient (Phase 3)
         // =====================================================================
 
-        public UniTask WriteLeaderboardRecordAsync(string leaderboardId, long score, CancellationToken ct = default)
-            => throw new NotImplementedException();
+        public UniTask WriteLeaderboardRecordAsync(string leaderboardId, long score,
+            long subscore = 0, Dictionary<string, object> metadata = null,
+            CancellationToken ct = default)
+            => _leaderboardService.WriteLeaderboardRecordAsync(leaderboardId, score, subscore, metadata, ct);
 
         public UniTask<LeaderboardRecordList> ListLeaderboardRecordsAsync(string leaderboardId, int limit = 10, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _leaderboardService.ListLeaderboardRecordsAsync(leaderboardId, limit, ct);
 
         public UniTask<LeaderboardRecordList> ListLeaderboardRecordsAroundUserAsync(string leaderboardId, string userId, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _leaderboardService.ListLeaderboardRecordsAroundUserAsync(leaderboardId, userId, ct);
 
         public UniTask DeleteLeaderboardRecordAsync(string leaderboardId, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _leaderboardService.DeleteLeaderboardRecordAsync(leaderboardId, ct);
 
         public UniTask<IEnumerable<LeaderboardRecord>> GetLeaderboardRecordsByIdsAsync(string leaderboardId, IEnumerable<string> userIds, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _leaderboardService.GetLeaderboardRecordsByIdsAsync(leaderboardId, userIds, ct);
 
         // =====================================================================
         // IChatClient (Phase 4)

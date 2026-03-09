@@ -16,10 +16,8 @@ namespace GameBackend.Tests.Core.Models
             var json = @"{
                 ""leaderboard_id"": ""weekly_kills"",
                 ""user_id"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
-                ""username"": ""player1"",
                 ""score"": 2500,
                 ""subscore"": 100,
-                ""num_score"": 5,
                 ""rank"": 1,
                 ""metadata"": { ""level"": 10 },
                 ""created_at"": ""2026-02-28T10:00:00Z"",
@@ -28,13 +26,13 @@ namespace GameBackend.Tests.Core.Models
 
             var result = JsonConvert.DeserializeObject<LeaderboardRecord>(json);
 
+            Assert.AreEqual("weekly_kills", result.LeaderboardId);
             Assert.AreEqual(1, result.Rank);
             Assert.AreEqual("a1b2c3d4-e5f6-7890-abcd-ef1234567890", result.UserId);
-            Assert.AreEqual("player1", result.Username);
             Assert.AreEqual(2500, result.Score);
             Assert.AreEqual(100, result.Subscore);
-            Assert.AreEqual(5, result.NumScore);
             Assert.IsNotNull(result.Metadata);
+            Assert.AreEqual(new DateTime(2026, 2, 28, 10, 0, 0, DateTimeKind.Utc), result.CreatedAt);
             Assert.AreEqual(new DateTime(2026, 2, 28, 14, 30, 0, DateTimeKind.Utc), result.UpdatedAt);
         }
 
@@ -44,7 +42,6 @@ namespace GameBackend.Tests.Core.Models
             var json = @"{
                 ""leaderboard_id"": ""weekly_kills"",
                 ""user_id"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
-                ""username"": ""player1"",
                 ""score"": 2500,
                 ""subscore"": 100,
                 ""rank"": 1,
@@ -70,7 +67,6 @@ namespace GameBackend.Tests.Core.Models
                     {
                         ""leaderboard_id"": ""weekly_kills"",
                         ""user_id"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
-                        ""username"": ""player1"",
                         ""score"": 2500,
                         ""subscore"": 100,
                         ""rank"": 1,
@@ -81,7 +77,6 @@ namespace GameBackend.Tests.Core.Models
                     {
                         ""leaderboard_id"": ""weekly_kills"",
                         ""user_id"": ""b2c3d4e5-f6a7-8901-bcde-f12345678901"",
-                        ""username"": ""player2"",
                         ""score"": 2100,
                         ""subscore"": 50,
                         ""rank"": 2,

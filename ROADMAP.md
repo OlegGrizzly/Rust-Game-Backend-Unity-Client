@@ -101,27 +101,36 @@
 
 ---
 
-## Phase 3: Account + Leaderboard (MVP) ⬜
+## Phase 3: Account + Leaderboard (MVP) ✅
 
-**Агенты:** TEST + REST — параллельно | **Deliverable:** MVP готов. ~44 тестов Green.
+**Агенты:** TEST + CORE + REST | **Deliverable:** MVP готов. 67 тестов Green (50 Phase 2 + 17 Phase 3).
 
 ### Паттерн TDD для каждого домена:
-1. TEST: curl-проверка endpoint-ов на VPS
-2. TEST: тесты с MockHttpAdapter (Red)
+1. TEST: тесты с MockHttpAdapter (Red)
+2. CORE: фикс моделей под реальный API
 3. REST: реализация сервиса (Green)
 4. Подключение к GameClient
 5. MCP-проверка
 6. Sample
 
+### Модели (CORE фикс):
+- [x] `Runtime/Core/Models/LeaderboardModels.cs` — добавлены LeaderboardId, CreatedAt; удалены NumScore, Username
+- [x] `Runtime/Core/Interfaces/ILeaderboardClient.cs` — добавлены subscore, metadata в WriteLeaderboardRecordAsync
+
 ### Account:
-- [ ] `Tests/Editor/Api/AccountServiceTests.cs` (~8 тестов)
-- [ ] `Runtime/Api/Services/AccountService.cs`
-- [ ] `Samples/Account/AccountExample.cs`
+- [x] `Tests/Editor/Api/AccountServiceTests.cs` (8 тестов)
+- [x] `Runtime/Api/Services/AccountService.cs`
+- [x] `Runtime/Api/Models/AccountRequestModels.cs`
+- [x] `Samples/Account/AccountExample.cs`
 
 ### Leaderboard:
-- [ ] `Tests/Editor/Api/LeaderboardServiceTests.cs` (~8 тестов)
-- [ ] `Runtime/Api/Services/LeaderboardService.cs`
-- [ ] `Samples/Leaderboard/LeaderboardExample.cs`
+- [x] `Tests/Editor/Api/LeaderboardServiceTests.cs` (8 тестов)
+- [x] `Runtime/Api/Services/LeaderboardService.cs`
+- [x] `Runtime/Api/Models/LeaderboardRequestModels.cs`
+- [x] `Samples/Leaderboard/LeaderboardExample.cs`
+
+### GameClient:
+- [x] `Runtime/Api/GameClient.cs` — Account и Leaderboard делегируют в сервисы
 
 ---
 

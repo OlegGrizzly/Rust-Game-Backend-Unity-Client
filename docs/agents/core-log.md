@@ -84,3 +84,15 @@
 
 ### Тесты
 - Transport адаптеры тестируются косвенно через AuthServiceTests (NewtonsoftSerializer используется напрямую в тестах)
+
+## [2026-03-09] Phase 3: Фикс моделей под реальный API
+
+### Что сделано
+- Обновлена модель LeaderboardRecord: добавлены LeaderboardId, CreatedAt; удалены NumScore, Username
+- Обновлён интерфейс ILeaderboardClient: WriteLeaderboardRecordAsync теперь принимает subscore и metadata
+- Обновлён stub в GameClient.cs под новую сигнатуру
+- Обновлены тесты десериализации LeaderboardModelsTests под новые поля
+
+### Решения
+- NumScore и Username удалены — их нет в реальном API response бэкенда
+- LeaderboardId и CreatedAt добавлены — присутствуют в каждом API response

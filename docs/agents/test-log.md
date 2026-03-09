@@ -65,3 +65,20 @@
 ### Тесты
 - 38 новых тестов + 12 Phase 1 = 50 total
 - Статус: 50/50 GREEN, 0 failed, 0 skipped
+
+## [2026-03-09] Phase 3: Тесты Account + Leaderboard
+
+### Что сделано
+- Создано 2 файла тестов (16 тест-методов) в `Tests/Editor/Api/`
+- Обновлены тесты десериализации LeaderboardModels
+
+### Файлы
+- `Tests/Editor/Api/AccountServiceTests.cs` — 8 тестов (GET/PUT/DELETE account, GET user, POST batch, 401, 404)
+- `Tests/Editor/Api/LeaderboardServiceTests.cs` — 8 тестов (POST record, GET top, GET around, DELETE, POST batch, 401, 404)
+
+### Исправления после первого прогона
+- 401-тесты падали: HttpPipeline при 401 пытается auto-refresh (второй HTTP запрос), но MockHttpAdapter имел только 1 ответ в очереди → добавлен второй EnqueueResponse(401) для refresh
+
+### Тесты
+- 17 новых тестов + 50 Phase 2 = 67 total
+- Статус: 67/67 GREEN
