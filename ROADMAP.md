@@ -31,43 +31,44 @@
 
 ---
 
-## Phase 1: Core контракты + Transport интерфейсы ⬜
+## Phase 1: Core контракты + Transport интерфейсы ✅
 
 **Агенты:** TEST (тесты десериализации) + CORE (контракты) — параллельно
-**Deliverable:** ~25 файлов контрактов, ~10 тестов (Red — не компилируются без реализации)
+**Deliverable:** 29 файлов контрактов, 4 файла тестов (12 тестов)
 
 ### TEST пишет тесты моделей:
-- [ ] `Tests/Editor/Core/Models/AuthResponseTests.cs` — десериализация snake_case JSON
-- [ ] `Tests/Editor/Core/Models/AccountTests.cs`, `LeaderboardRecordTests.cs`
-- [ ] `Tests/Editor/Core/Exceptions/GameApiExceptionTests.cs`
+- [x] `Tests/Editor/Core/Models/AuthModelsTests.cs` — десериализация AuthResponse, AuthUser, SessionInfo
+- [x] `Tests/Editor/Core/Models/AccountModelsTests.cs` — Account (nullable fields, ban fields), User
+- [x] `Tests/Editor/Core/Models/LeaderboardModelsTests.cs` — LeaderboardRecord, LeaderboardRecordList
+- [x] `Tests/Editor/Core/Exceptions/GameApiExceptionTests.cs` — конструктор, наследование, nullable
 
 ### CORE создает контракты:
 
 **Интерфейсы** (`Runtime/Core/Interfaces/`):
-- [ ] `IAuthClient.cs` — 13 методов (3 Authenticate + 3 Login + RefreshSession + Logout + ListSessions + RevokeSession + RevokeAllSessions + LinkProvider + UnlinkProvider)
-- [ ] `IAccountClient.cs` — 5 методов (get/update/delete account, get user, batch)
-- [ ] `ILeaderboardClient.cs` — 5 методов (write/list/around/delete/batch)
-- [ ] `IChatClient.cs` — 5 методов (channels, messages, unread, mark read)
-- [ ] `IStorageClient.cs` — 5 методов (write/read/delete/search/count)
-- [ ] `IFriendsClient.cs` — 10 методов (add/accept/reject/remove/block/unblock + lists)
-- [ ] `IGroupsClient.cs` — 15 методов (CRUD + join/requestJoin/acceptRequest/rejectRequest/listRequests/kick/promote/demote/leave/members/search/myGroups)
-- [ ] `INotificationClient.cs` — 4 метода (list/unread/read/delete)
-- [ ] `ITournamentClient.cs` — 4 метода (list/get/join/record)
-- [ ] `IGameClient.cs` — фасад (наследует все 9 + Session, IsAuthenticated, RestoreSession, ClearSession, GlobalRetryConfiguration, NewSocket)
-- [ ] `IGameSession.cs` — AuthToken, RefreshToken, UserId, IsExpired
-- [ ] `IGameSocket.cs` — IsConnected, 14 events, Connect/Close/SendChatMessage
+- [x] `IAuthClient.cs` — 13 методов (3 Authenticate + 3 Login + RefreshSession + Logout + ListSessions + RevokeSession + RevokeAllSessions + LinkProvider + UnlinkProvider)
+- [x] `IAccountClient.cs` — 5 методов (get/update/delete account, get user, batch)
+- [x] `ILeaderboardClient.cs` — 5 методов (write/list/around/delete/batch)
+- [x] `IChatClient.cs` — 5 методов (channels, messages, unread, mark read)
+- [x] `IStorageClient.cs` — 5 методов (write/read/delete/search/count)
+- [x] `IFriendsClient.cs` — 10 методов (add/accept/reject/remove/block/unblock + lists)
+- [x] `IGroupsClient.cs` — 15 методов (CRUD + join/requestJoin/acceptRequest/rejectRequest/listRequests/kick/promote/demote/leave/members/search/myGroups)
+- [x] `INotificationClient.cs` — 4 метода (list/unread/read/delete)
+- [x] `ITournamentClient.cs` — 4 метода (list/get/join/record)
+- [x] `IGameClient.cs` — фасад (наследует все 9 + Session, IsAuthenticated, RestoreSession, ClearSession, GlobalRetryConfiguration, NewSocket)
+- [x] `IGameSession.cs` — AuthToken, RefreshToken, UserId, Username, DisplayName, ExpireTime, RefreshExpireTime, IsExpired, IsRefreshExpired, HasExpired, HasRefreshExpired + static GameSession.Restore
+- [x] `IGameSocket.cs` — IDisposable, IsConnected, 14 events, Connect/Close/SendChatMessage
 
-**Модели** (`Runtime/Core/Models/`):
-- [ ] AuthResponse, AuthUser, Account, User, LeaderboardRecord, LeaderboardRecordList, Channel, ChatMessage, MessageList, CreateChannelRequest, UnreadInfo, StorageObject, StorageObjectWrite, StorageObjectId, Friend, FriendRequest, FriendEvent, Group, GroupMember, GroupJoinRequest, MyGroup, GroupEvent, Notification, NotificationList, Tournament, TournamentReward, TournamentRecord, TournamentDetails, TournamentEvent, PresenceUpdate, BanInfo, WebSocketEnvelope, HttpRequest, HttpResponse (~20+ файлов)
+**Модели** (`Runtime/Core/Models/` — 11 файлов, ~35 классов):
+- [x] AuthModels.cs (AuthResponse, AuthUser, SessionInfo), AccountModels.cs (Account + ban fields, User), LeaderboardModels.cs, ChatModels.cs, StorageModels.cs, FriendModels.cs, GroupModels.cs, NotificationModels.cs, TournamentModels.cs, WebSocketModels.cs (PresenceUpdate, BanInfo, WebSocketEnvelope), HttpModels.cs (HttpRequest, HttpResponse)
 
 **Исключения** (`Runtime/Core/Exceptions/`):
-- [ ] GameApiException (StatusCode, ErrorMessage)
+- [x] GameApiException (StatusCode, ErrorMessage, ErrorCode, RequestId)
 
 **Конфигурация** (`Runtime/Core/`):
-- [ ] RetryConfiguration
+- [x] RetryConfiguration (BaseDelayMs, MaxRetries, RetryListener)
 
 **Transport интерфейсы** (`Runtime/Transport/Interfaces/`):
-- [ ] IHttpAdapter, IWebSocketAdapter, ISerializer, ITokenStorage
+- [x] IHttpAdapter, IWebSocketAdapter, ISerializer, ITokenStorage
 
 ---
 
