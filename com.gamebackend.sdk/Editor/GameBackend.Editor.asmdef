@@ -1,6 +1,9 @@
 {
     "name": "GameBackend.Editor",
-    "references": [],
+    "rootNamespace": "GameBackend.Editor",
+    "references": [
+        "GameBackend"
+    ],
     "includePlatforms": [
         "Editor"
     ],

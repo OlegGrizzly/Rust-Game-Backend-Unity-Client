@@ -1,5 +1,6 @@
 {
     "name": "GameBackend",
+    "rootNamespace": "GameBackend",
     "references": [
         "UniTask",
         "Unity.Newtonsoft.Json",

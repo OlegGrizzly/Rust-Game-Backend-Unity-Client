@@ -6,7 +6,8 @@
   "description": "Unity SDK for Rust-Game-Backend.",
   "dependencies": {
     "com.cysharp.unitask": "2.5.10",
-    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm"
+    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   },
   "keywords": [
     "game-backend",
