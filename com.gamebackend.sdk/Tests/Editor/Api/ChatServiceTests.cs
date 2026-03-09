@@ -177,6 +177,57 @@ namespace GameBackend.Tests.Api
         }
 
         // =====================================================================
+        // GET /api/ws/channels/rooms?limit=N&offset=N
+        // =====================================================================
+
+        [Test]
+        public async Task ListRooms_ReturnsRooms()
+        {
+            var json = @"[
+                {""id"":""room-1"",""name"":""public-lobby"",""channel_type"":""group"",""context"":null,""created_by"":""user-1"",""created_at"":""2026-03-01T10:00:00Z""},
+                {""id"":""room-2"",""name"":""arena"",""channel_type"":""group"",""context"":null,""created_by"":""user-2"",""created_at"":""2026-03-01T11:00:00Z""}
+            ]";
+            _httpAdapter.EnqueueResponse(200, json);
+
+            var rooms = await _chatService.ListRoomsAsync(limit: 10, offset: 0);
+            var roomList = rooms.ToList();
+
+            Assert.AreEqual(2, roomList.Count);
+            Assert.AreEqual("room-1", roomList[0].Id);
+            Assert.AreEqual("public-lobby", roomList[0].Name);
+            Assert.AreEqual("room-2", roomList[1].Id);
+            Assert.AreEqual("arena", roomList[1].Name);
+            Assert.AreEqual("GET", _httpAdapter.SentRequests[0].Method);
+            Assert.AreEqual($"{BaseUrl}/api/ws/channels/rooms?limit=10&offset=0", _httpAdapter.SentRequests[0].Url);
+        }
+
+        // =====================================================================
+        // POST /api/ws/channels/{id}/join
+        // =====================================================================
+
+        [Test]
+        public async Task JoinRoom_ReturnsChannel()
+        {
+            var json = @"{
+                ""id"":""room-1"",
+                ""name"":""public-lobby"",
+                ""channel_type"":""group"",
+                ""context"":null,
+                ""created_by"":""user-1"",
+                ""created_at"":""2026-03-01T10:00:00Z""
+            }";
+            _httpAdapter.EnqueueResponse(200, json);
+
+            var channel = await _chatService.JoinRoomAsync("room-1");
+
+            Assert.AreEqual("room-1", channel.Id);
+            Assert.AreEqual("public-lobby", channel.Name);
+            Assert.AreEqual("group", channel.ChannelType);
+            Assert.AreEqual("POST", _httpAdapter.SentRequests[0].Method);
+            Assert.AreEqual($"{BaseUrl}/api/ws/channels/room-1/join", _httpAdapter.SentRequests[0].Url);
+        }
+
+        // =====================================================================
         // Error handling
         // =====================================================================
 

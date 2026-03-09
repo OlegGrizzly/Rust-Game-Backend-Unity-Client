@@ -170,6 +170,12 @@ namespace GameBackend.Api
         public UniTask MarkChannelReadAsync(string channelId, CancellationToken ct = default)
             => _chatService.MarkChannelReadAsync(channelId, ct);
 
+        public UniTask<IEnumerable<Core.Models.Channel>> ListRoomsAsync(int limit = 50, int offset = 0, CancellationToken ct = default)
+            => _chatService.ListRoomsAsync(limit, offset, ct);
+
+        public UniTask<Core.Models.Channel> JoinRoomAsync(string channelId, CancellationToken ct = default)
+            => _chatService.JoinRoomAsync(channelId, ct);
+
         // =====================================================================
         // IStorageClient (Phase 5)
         // =====================================================================

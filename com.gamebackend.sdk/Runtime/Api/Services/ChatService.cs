@@ -79,5 +79,25 @@ namespace GameBackend.Api
             };
             await _pipeline.SendAsync(request, ct);
         }
+
+        public async UniTask<IEnumerable<Channel>> ListRoomsAsync(int limit = 50, int offset = 0, CancellationToken ct = default)
+        {
+            var request = new HttpRequest
+            {
+                Method = "GET",
+                Url = $"{_baseUrl}/api/ws/channels/rooms?limit={limit}&offset={offset}"
+            };
+            return await _pipeline.SendAsync<List<Channel>>(request, ct);
+        }
+
+        public async UniTask<Channel> JoinRoomAsync(string channelId, CancellationToken ct = default)
+        {
+            var request = new HttpRequest
+            {
+                Method = "POST",
+                Url = $"{_baseUrl}/api/ws/channels/{channelId}/join"
+            };
+            return await _pipeline.SendAsync<Channel>(request, ct);
+        }
     }
 }

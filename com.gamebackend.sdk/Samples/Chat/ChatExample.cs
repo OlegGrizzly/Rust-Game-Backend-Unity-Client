@@ -119,6 +119,40 @@ namespace GameBackend.Samples
             catch (Exception e) { lastResult = $"Error: {e.Message}"; Debug.LogError(lastResult); }
         }
 
+        [ContextMenu("Browse Rooms")]
+        private async void BrowseRooms()
+        {
+            try
+            {
+                var rooms = await Client.ListRoomsAsync(limit: 20);
+                var list = rooms.ToList();
+                lastResult = $"Rooms ({list.Count}):";
+                foreach (var r in list)
+                    lastResult += $"\n  [{r.ChannelType}] {r.Id} - {r.Name}";
+                Debug.Log(lastResult);
+            }
+            catch (Exception e) { lastResult = $"Error: {e.Message}"; Debug.LogError(lastResult); }
+        }
+
+        [ContextMenu("Join Room")]
+        private async void JoinRoom()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(channelId))
+                {
+                    lastResult = "channelId is empty. Set it in Inspector or browse rooms first.";
+                    Debug.LogWarning(lastResult);
+                    return;
+                }
+
+                var channel = await Client.JoinRoomAsync(channelId);
+                lastResult = $"Joined room: {channel.Id}\nName: {channel.Name}\nType: {channel.ChannelType}";
+                Debug.Log(lastResult);
+            }
+            catch (Exception e) { lastResult = $"Error: {e.Message}"; Debug.LogError(lastResult); }
+        }
+
         [ContextMenu("Mark Read")]
         private async void MarkRead()
         {
