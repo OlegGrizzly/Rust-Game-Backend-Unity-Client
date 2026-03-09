@@ -4,6 +4,7 @@ namespace GameBackend.Core.Interfaces
 {
     public interface IGameSession
     {
+
         /// <summary>JWT access token</summary>
         string AuthToken { get; }
 
@@ -38,14 +39,4 @@ namespace GameBackend.Core.Interfaces
         bool HasRefreshExpired(DateTime offset);
     }
 
-    /// <summary>Static method for restoring session from saved tokens</summary>
-    public static class GameSession
-    {
-        /// <summary>Restore session from previously saved tokens</summary>
-        public static IGameSession Restore(string authToken, string refreshToken)
-        {
-            // Implementation will be provided by the Api layer
-            throw new NotImplementedException("GameSession.Restore must be implemented by the Api layer.");
-        }
-    }
 }

@@ -65,4 +65,22 @@
 
 ### Тесты
 - 12 тестов десериализации написаны TEST агентом (параллельно)
-- Статус: ожидает проверки компиляции в Unity Editor
+- Статус: 12/12 GREEN
+
+## [2026-03-09] Phase 2: Transport адаптеры
+
+### Что сделано
+- Создано 3 файла Transport адаптеров
+
+### Файлы
+- `Runtime/Transport/Serialization/NewtonsoftSerializer.cs` — ISerializer, SnakeCaseNamingStrategy, NullValueHandling.Ignore, ISO 8601
+- `Runtime/Transport/Http/UnityWebRequestAdapter.cs` — IHttpAdapter через UnityWebRequest, CancellationToken → Abort()
+- `Runtime/Transport/Storage/PlayerPrefsTokenStorage.cs` — ITokenStorage через PlayerPrefs (gb_auth_token, gb_refresh_token)
+
+### Архитектурные решения
+- NewtonsoftSerializer: единый JsonSerializerSettings для Serialize/Deserialize — snake_case, ignore nulls, MissingMemberHandling.Ignore
+- UnityWebRequestAdapter: UploadHandlerRaw для body (UTF-8), DownloadHandlerBuffer для response
+- PlayerPrefsTokenStorage: только refresh_token реально используется для RestoreSession, access_token хранится в памяти GameSession
+
+### Тесты
+- Transport адаптеры тестируются косвенно через AuthServiceTests (NewtonsoftSerializer используется напрямую в тестах)

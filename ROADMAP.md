@@ -72,30 +72,32 @@
 
 ---
 
-## Phase 2: Transport реализации + Auth (первый сквозной запрос) ⬜
+## Phase 2: Transport реализации + Auth (первый сквозной запрос) ✅
 
 **Агенты:** TEST → CORE → AUTH (последовательно)
-**Deliverable:** Authenticate/login работает, auto-refresh при 401, retry с backoff. ~28 тестов Green.
+**Deliverable:** Authenticate/login работает, auto-refresh при 401, retry с backoff. 50 тестов Green (12 Phase 1 + 38 Phase 2).
 
 ### TEST пишет тесты Auth:
-- [ ] `Tests/Editor/Mocks/MockHttpAdapter.cs` — очередь ответов
-- [ ] `Tests/Editor/Mocks/MockTokenStorage.cs` — in-memory
-- [ ] `Tests/Editor/Auth/AuthServiceTests.cs` — ~20 тестов (authenticate 3 провайдера, login 3, refresh, logout, listSessions, revokeSession, revokeAllSessions, linkProvider, unlinkProvider, 401/403)
-- [ ] `Tests/Editor/Auth/GameSessionTests.cs` — ~6 тестов (JWT decode, IsExpired)
+- [x] `Tests/Editor/Mocks/MockHttpAdapter.cs` — очередь ответов
+- [x] `Tests/Editor/Mocks/MockTokenStorage.cs` — in-memory
+- [x] `Tests/Editor/Mocks/TestJwtHelper.cs` — создание тестовых JWT
+- [x] `Tests/Editor/Auth/AuthServiceTests.cs` — 22 теста (authenticate 3 провайдера, login 3, refresh, logout, listSessions, revokeSession, revokeAllSessions, linkProvider, unlinkProvider, 401 auto-refresh, 403, ошибки)
+- [x] `Tests/Editor/Auth/GameSessionTests.cs` — 10 тестов (JWT decode, IsExpired, HasExpired, ExpireTime)
 
 ### CORE создает адаптеры:
-- [ ] `Runtime/Transport/Serialization/NewtonsoftSerializer.cs` — snake_case, ISO 8601
-- [ ] `Runtime/Transport/Http/UnityWebRequestAdapter.cs` — IHttpAdapter → UnityWebRequest
-- [ ] `Runtime/Transport/Storage/PlayerPrefsTokenStorage.cs` — refresh_token в PlayerPrefs
+- [x] `Runtime/Transport/Serialization/NewtonsoftSerializer.cs` — snake_case, ISO 8601
+- [x] `Runtime/Transport/Http/UnityWebRequestAdapter.cs` — IHttpAdapter → UnityWebRequest
+- [x] `Runtime/Transport/Storage/PlayerPrefsTokenStorage.cs` — refresh_token в PlayerPrefs
 
 ### AUTH реализует:
-- [ ] `Runtime/Api/GameSession.cs` — JWT base64 decode, expiry check
-- [ ] `Runtime/Api/Pipeline/TokenManager.cs` — concurrent refresh (SemaphoreSlim)
-- [ ] `Runtime/Api/Pipeline/HttpPipeline.cs` — auth header → send → 401 auto-refresh → retry → error mapping
-- [ ] `Runtime/Api/Pipeline/RetryMiddleware.cs` — exponential backoff, jitter, 429 Retry-After
-- [ ] `Runtime/Api/Services/AuthService.cs` — IAuthClient
-- [ ] `Runtime/Api/GameClient.cs` — фасад (auth работает, остальное NotImplementedException)
-- [ ] `Samples/Auth/AuthExample.cs`
+- [x] `Runtime/Api/GameSessionImpl.cs` — JWT base64url decode, expiry check
+- [x] `Runtime/Api/TokenManager.cs` — concurrent refresh (SemaphoreSlim)
+- [x] `Runtime/Api/HttpPipeline.cs` — auth header → send → 401 auto-refresh → retry → error mapping
+- [x] `Runtime/Api/Pipeline/RetryMiddleware.cs` — exponential backoff, jitter, 429 Retry-After
+- [x] `Runtime/Api/Services/AuthService.cs` — IAuthClient (13 методов)
+- [x] `Runtime/Api/Models/AuthRequestModels.cs` — request body модели
+- [x] `Runtime/Api/GameClient.cs` — фасад (auth работает, остальное NotImplementedException)
+- [x] `Samples/Auth/AuthExample.cs` — MonoBehaviour с [ContextMenu] для 13 auth методов
 
 ---
 
