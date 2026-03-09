@@ -24,6 +24,16 @@ namespace GameBackend.Samples
         private GameClient _client;
         private GameClient Client => _client ?? (_client = new GameClient(scheme, host, port));
 
+        [ContextMenu("Restore Session")]
+        private void RestoreSession()
+        {
+            var restored = Client.RestoreSession();
+            lastResult = restored
+                ? $"Session restored: {Client.Session.UserId}"
+                : "No saved session found";
+            Debug.Log(lastResult);
+        }
+
         [ContextMenu("Get My Account")]
         private async void GetMyAccount()
         {

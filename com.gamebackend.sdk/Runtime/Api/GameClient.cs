@@ -140,8 +140,8 @@ namespace GameBackend.Api
         public UniTask<LeaderboardRecordList> ListLeaderboardRecordsAsync(string leaderboardId, int limit = 10, CancellationToken ct = default)
             => _leaderboardService.ListLeaderboardRecordsAsync(leaderboardId, limit, ct);
 
-        public UniTask<LeaderboardRecordList> ListLeaderboardRecordsAroundUserAsync(string leaderboardId, string userId, CancellationToken ct = default)
-            => _leaderboardService.ListLeaderboardRecordsAroundUserAsync(leaderboardId, userId, ct);
+        public UniTask<LeaderboardRecordList> ListLeaderboardRecordsAroundUserAsync(string leaderboardId, string userId, int limit = 10, CancellationToken ct = default)
+            => _leaderboardService.ListLeaderboardRecordsAroundUserAsync(leaderboardId, userId, limit, ct);
 
         public UniTask DeleteLeaderboardRecordAsync(string leaderboardId, CancellationToken ct = default)
             => _leaderboardService.DeleteLeaderboardRecordAsync(leaderboardId, ct);

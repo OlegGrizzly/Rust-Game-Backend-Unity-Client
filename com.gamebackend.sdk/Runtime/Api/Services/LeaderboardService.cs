@@ -49,12 +49,12 @@ namespace GameBackend.Api
         }
 
         public async UniTask<LeaderboardRecordList> ListLeaderboardRecordsAroundUserAsync(string leaderboardId,
-            string userId, CancellationToken ct = default)
+            string userId, int limit = 10, CancellationToken ct = default)
         {
             var request = new HttpRequest
             {
                 Method = "GET",
-                Url = $"{_baseUrl}/api/leaderboard/leaderboards/{leaderboardId}/around/{userId}"
+                Url = $"{_baseUrl}/api/leaderboard/leaderboards/{leaderboardId}/around/{userId}?limit={limit}"
             };
             var records = await _pipeline.SendAsync<List<LeaderboardRecord>>(request, ct);
             return new LeaderboardRecordList { Records = records };

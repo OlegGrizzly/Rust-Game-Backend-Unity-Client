@@ -24,6 +24,16 @@ namespace GameBackend.Samples
         private GameClient _client;
         private GameClient Client => _client ?? (_client = new GameClient(scheme, host, port));
 
+        [ContextMenu("Restore Session")]
+        private void RestoreSession()
+        {
+            var restored = Client.RestoreSession();
+            lastResult = restored
+                ? $"Session restored: {Client.Session.UserId}"
+                : "No saved session found";
+            Debug.Log(lastResult);
+        }
+
         [ContextMenu("Submit Score")]
         private async void SubmitScore()
         {
@@ -62,7 +72,7 @@ namespace GameBackend.Samples
                     Debug.LogWarning(lastResult);
                     return;
                 }
-                var result = await Client.ListLeaderboardRecordsAroundUserAsync(leaderboardId, userId);
+                var result = await Client.ListLeaderboardRecordsAroundUserAsync(leaderboardId, userId, limit: 3);
                 var records = result.Records.ToList();
                 lastResult = $"Around me ({records.Count} records):";
                 foreach (var r in records) lastResult += $"\n  #{r.Rank} {r.UserId}: {r.Score}";

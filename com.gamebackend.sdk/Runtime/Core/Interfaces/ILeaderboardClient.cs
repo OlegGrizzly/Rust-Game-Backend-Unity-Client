@@ -11,7 +11,7 @@ namespace GameBackend.Core.Interfaces
             long subscore = 0, Dictionary<string, object> metadata = null,
             CancellationToken ct = default);
         UniTask<LeaderboardRecordList> ListLeaderboardRecordsAsync(string leaderboardId, int limit = 10, CancellationToken ct = default);
-        UniTask<LeaderboardRecordList> ListLeaderboardRecordsAroundUserAsync(string leaderboardId, string userId, CancellationToken ct = default);
+        UniTask<LeaderboardRecordList> ListLeaderboardRecordsAroundUserAsync(string leaderboardId, string userId, int limit = 10, CancellationToken ct = default);
         UniTask DeleteLeaderboardRecordAsync(string leaderboardId, CancellationToken ct = default);
         UniTask<IEnumerable<LeaderboardRecord>> GetLeaderboardRecordsByIdsAsync(string leaderboardId, IEnumerable<string> userIds, CancellationToken ct = default);
     }
