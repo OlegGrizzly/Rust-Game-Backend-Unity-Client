@@ -16,9 +16,15 @@ namespace GameBackend.Core.Interfaces
         event Action<Exception> ReceivedError;
         event Action<ChatMessage> ReceivedChatMessage;
         event Action<PresenceUpdate> ReceivedPresenceUpdate;
-        event Action<Notification> ReceivedNotification;
-        event Action ReceivedSessionRevoked;
-        event Action<BanInfo> ReceivedUserBanned;
+        event Action<PresenceStateEvent> ReceivedPresenceState;
+        event Action<ChannelEvent> ReceivedChannelJoined;
+        event Action<ChannelEvent> ReceivedChannelLeft;
+        event Action<ChannelMembersEvent> ReceivedChannelMembers;
+        event Action<ChannelEvent> ReceivedChannelMemberJoined;
+        event Action<ChannelEvent> ReceivedChannelMemberLeft;
+        event Action<SessionRevokedEvent> ReceivedSessionRevoked;
+        event Action<UserBannedEvent> ReceivedUserBanned;
+        event Action<NotificationEvent> ReceivedNotification;
         event Action<FriendEvent> ReceivedFriendRequest;
         event Action<FriendEvent> ReceivedFriendAccepted;
         event Action<GroupEvent> ReceivedGroupJoined;

@@ -23,6 +23,7 @@ namespace GameBackend.Api
         private readonly AuthService _authService;
         private readonly AccountService _accountService;
         private readonly LeaderboardService _leaderboardService;
+        private readonly ChatService _chatService;
 
         public IGameSession Session => _tokenManager.CurrentSession;
         public bool IsAuthenticated => _tokenManager.CurrentSession != null && !_tokenManager.CurrentSession.IsExpired;
@@ -43,6 +44,7 @@ namespace GameBackend.Api
             _authService = new AuthService(_pipeline, _tokenManager, baseUrl);
             _accountService = new AccountService(_pipeline, baseUrl);
             _leaderboardService = new LeaderboardService(_pipeline, baseUrl);
+            _chatService = new ChatService(_pipeline, baseUrl);
         }
 
         // =====================================================================
@@ -154,19 +156,19 @@ namespace GameBackend.Api
         // =====================================================================
 
         public UniTask<IEnumerable<Core.Models.Channel>> ListChannelsAsync(CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _chatService.ListChannelsAsync(ct);
 
         public UniTask<Core.Models.Channel> CreateChannelAsync(CreateChannelRequest request, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _chatService.CreateChannelAsync(request, ct);
 
-        public UniTask<MessageList> ListMessagesAsync(string channelId, int limit = 50, string cursor = null, CancellationToken ct = default)
-            => throw new NotImplementedException();
+        public UniTask<MessageList> ListMessagesAsync(string channelId, int limit = 50, string cursor = null, string direction = "older", CancellationToken ct = default)
+            => _chatService.ListMessagesAsync(channelId, limit, cursor, direction, ct);
 
         public UniTask<UnreadInfo> GetUnreadAsync(string channelId, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _chatService.GetUnreadAsync(channelId, ct);
 
         public UniTask MarkChannelReadAsync(string channelId, CancellationToken ct = default)
-            => throw new NotImplementedException();
+            => _chatService.MarkChannelReadAsync(channelId, ct);
 
         // =====================================================================
         // IStorageClient (Phase 5)

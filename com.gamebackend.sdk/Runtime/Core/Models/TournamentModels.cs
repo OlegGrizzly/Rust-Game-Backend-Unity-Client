@@ -105,7 +105,7 @@ namespace GameBackend.Core.Models
         [JsonProperty("tournament_id")]
         public string TournamentId;
 
-        [JsonProperty("title")]
-        public string Title;
+        [JsonProperty("name")]
+        public string Name;
     }
 }

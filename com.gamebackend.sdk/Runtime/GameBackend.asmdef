@@ -4,7 +4,7 @@
     "references": [
         "UniTask",
         "Unity.Newtonsoft.Json",
-        "NativeWebSocket"
+        "endel.nativewebsocket"
     ],
     "includePlatforms": [],
     "excludePlatforms": []
