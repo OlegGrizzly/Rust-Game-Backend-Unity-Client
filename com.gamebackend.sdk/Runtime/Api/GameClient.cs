@@ -6,6 +6,8 @@ using GameBackend.Core;
 using GameBackend.Core.Interfaces;
 using GameBackend.Core.Models;
 using GameBackend.Transport;
+using GameBackend.Transport.Http;
+using GameBackend.Transport.Storage;
 using GameBackend.Transport.Interfaces;
 
 namespace GameBackend.Api
@@ -31,8 +33,9 @@ namespace GameBackend.Api
         {
             var baseUrl = $"{scheme}://{host}:{port}";
 
+            httpAdapter = httpAdapter ?? new UnityWebRequestAdapter();
             serializer = serializer ?? new NewtonsoftSerializer();
-            tokenStorage = tokenStorage ?? new PlayerPrefsTokenStorage();
+            tokenStorage = tokenStorage ?? new GameBackend.Transport.Storage.PlayerPrefsTokenStorage();
             _tokenManager = new TokenManager(serializer, tokenStorage);
             _pipeline = new HttpPipeline(httpAdapter, serializer, _tokenManager);
             _authService = new AuthService(_pipeline, _tokenManager, baseUrl);
@@ -249,42 +252,4 @@ namespace GameBackend.Api
             => throw new NotImplementedException();
     }
 
-    /// <summary>
-    /// Default ITokenStorage using PlayerPrefs. Placeholder for now.
-    /// </summary>
-    internal class PlayerPrefsTokenStorage : ITokenStorage
-    {
-        private const string AuthTokenKey = "GameBackend.AuthToken";
-        private const string RefreshTokenKey = "GameBackend.RefreshToken";
-
-        public void Save(string authToken, string refreshToken)
-        {
-#if UNITY_5_3_OR_NEWER
-            UnityEngine.PlayerPrefs.SetString(AuthTokenKey, authToken);
-            UnityEngine.PlayerPrefs.SetString(RefreshTokenKey, refreshToken);
-            UnityEngine.PlayerPrefs.Save();
-#endif
-        }
-
-        public (string authToken, string refreshToken) Load()
-        {
-#if UNITY_5_3_OR_NEWER
-            return (
-                UnityEngine.PlayerPrefs.GetString(AuthTokenKey, ""),
-                UnityEngine.PlayerPrefs.GetString(RefreshTokenKey, "")
-            );
-#else
-            return ("", "");
-#endif
-        }
-
-        public void Clear()
-        {
-#if UNITY_5_3_OR_NEWER
-            UnityEngine.PlayerPrefs.DeleteKey(AuthTokenKey);
-            UnityEngine.PlayerPrefs.DeleteKey(RefreshTokenKey);
-            UnityEngine.PlayerPrefs.Save();
-#endif
-        }
-    }
 }
