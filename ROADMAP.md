@@ -4,6 +4,8 @@
 
 Проект — чистый scaffolding (шаблон StansAssets). Реального кода SDK нет. Нужно реализовать полный Unity SDK клиент для микросервисного Rust бэкенда: REST API (9 доменов) + WebSocket (чат, presence, push). SDK — низкоуровневый транспортный слой без UI/кэширования.
 
+> **Scope:** SDK покрывает только client-facing API. Admin endpoints (`/api/*/admin/*`) НЕ входят в scope SDK.
+
 Спецификации бэкенда: `docs/sdk/unity-sdk-readme.md`, `docs/sdk/client-protocol.md`, `docs/api/rest.md`, `docs/api/websocket.md` в `/Users/olegsedyh/Unity Projects/Rust-Game-Backend/`.
 
 ## Стратегическое решение: .asmdef
@@ -40,7 +42,7 @@
 ### CORE создает контракты:
 
 **Интерфейсы** (`Runtime/Core/Interfaces/`):
-- `IAuthClient.cs` — 12 методов (3 register + 3 login + refresh + logout + listSessions + revokeSession + linkProvider + unlinkProvider)
+- `IAuthClient.cs` — 13 методов (3 Authenticate + 3 Login + RefreshSession + Logout + ListSessions + RevokeSession + RevokeAllSessions + LinkProvider + UnlinkProvider)
 - `IAccountClient.cs` — 5 методов (get/update/delete account, get user, batch)
 - `ILeaderboardClient.cs` — 5 методов (write/list/around/delete/batch)
 - `IChatClient.cs` — 5 методов (channels, messages, unread, mark read)
@@ -49,11 +51,11 @@
 - `IGroupsClient.cs` — 15 методов (CRUD + join/requestJoin/acceptRequest/rejectRequest/listRequests/kick/promote/demote/leave/members/search/myGroups)
 - `INotificationClient.cs` — 4 метода (list/unread/read/delete)
 - `ITournamentClient.cs` — 4 метода (list/get/join/record)
-- `IGameClient.cs` — фасад (наследует все 9 + Session, RestoreSession, ClearSession, NewSocket)
+- `IGameClient.cs` — фасад (наследует все 9 + Session, IsAuthenticated, RestoreSession, ClearSession, GlobalRetryConfiguration, NewSocket)
 - `IGameSession.cs` — AuthToken, RefreshToken, UserId, IsExpired
-- `IGameSocket.cs` — IsConnected, 12+ events, Connect/Close/Send
+- `IGameSocket.cs` — IsConnected, 14 events, Connect/Close/SendChatMessage
 
-**Модели** (`Runtime/Core/Models/`): AuthResponse, Account, LeaderboardRecord, Channel, ChatMessage, StorageObject, Friend, Group, Notification, Tournament, Presence, WebSocketEnvelope, HttpRequest/HttpResponse (~12 файлов)
+**Модели** (`Runtime/Core/Models/`): AuthResponse, AuthUser, Account, User, LeaderboardRecord, LeaderboardRecordList, Channel, ChatMessage, MessageList, CreateChannelRequest, UnreadInfo, StorageObject, StorageObjectWrite, StorageObjectId, Friend, FriendRequest, FriendEvent, Group, GroupMember, GroupJoinRequest, MyGroup, GroupEvent, Notification, NotificationList, Tournament, TournamentReward, TournamentRecord, TournamentDetails, TournamentEvent, PresenceUpdate, BanInfo, WebSocketEnvelope, HttpRequest, HttpResponse (~20+ файлов, связанные DTO можно группировать в один файл)
 
 **Исключения** (`Runtime/Core/Exceptions/`): GameApiException (StatusCode, ErrorMessage)
 
@@ -66,12 +68,12 @@
 ## Phase 2: Transport реализации + Auth (первый сквозной запрос)
 
 **Агенты:** TEST → CORE → AUTH (последовательно)
-**Deliverable:** Register/login работает, auto-refresh при 401, retry с backoff. ~28 тестов Green.
+**Deliverable:** Authenticate/login работает, auto-refresh при 401, retry с backoff. ~28 тестов Green.
 
 ### TEST пишет тесты Auth:
 - `Tests/Editor/Mocks/MockHttpAdapter.cs` — очередь ответов
 - `Tests/Editor/Mocks/MockTokenStorage.cs` — in-memory
-- `Tests/Editor/Auth/AuthServiceTests.cs` — ~18 тестов (register 3 провайдера, login, refresh, logout, listSessions, revokeSession, linkProvider, unlinkProvider, 401/403)
+- `Tests/Editor/Auth/AuthServiceTests.cs` — ~20 тестов (authenticate 3 провайдера, login 3, refresh, logout, listSessions, revokeSession, revokeAllSessions, linkProvider, unlinkProvider, 401/403)
 - `Tests/Editor/Auth/GameSessionTests.cs` — ~6 тестов (JWT decode, IsExpired)
 
 ### CORE создает адаптеры:
@@ -125,7 +127,7 @@
 - `Runtime/Transport/WebSocket/NativeWebSocketAdapter.cs`
 - `Runtime/WebSocket/GameSocket.cs` — dispatch по type, fire events
 - `Runtime/WebSocket/ReconnectHandler.cs` — exponential backoff 1s→30s
-- `Runtime/WebSocket/HeartbeatManager.cs` — ping 30s, pong timeout 10s
+- `Runtime/WebSocket/HeartbeatManager.cs` — ping 30s, pong timeout 10s, server inactivity timeout 60s (heartbeat предотвращает)
 - `Runtime/WebSocket/WebSocketMessageDispatcher.cs`
 
 ### Файлы Chat REST:
@@ -172,10 +174,15 @@
 
 - `Editor/GameBackendSettings.cs` — ScriptableObject (scheme, host, port)
 - `Editor/GameBackendSettingsWindow.cs` — SettingsProvider
-- `Editor/SessionInspectorWindow.cs` — EditorWindow (UserId, token expiry, IsAuthenticated)
+- `Editor/SessionInspectorWindow.cs` — EditorWindow (UserId, Username, DisplayName, token expiry, IsAuthenticated)
 - Обновить `Editor/GameBackend.Editor.asmdef` — references на Core, Api
 
-Опционально: `Runtime/Integrations/VContainer/GameBackendVContainerExtensions.cs`
+- `Editor/DebugConsoleIntegration.cs` — логирование SDK HTTP запросов/ответов в Editor Console (опционально)
+
+Опциональные интеграции (отдельные .asmdef с `defineConstraints`):
+- `Runtime/Integrations/VContainer/GameBackendVContainerExtensions.cs` — DI регистрация IGameClient, IGameSocket
+- `Runtime/Integrations/R3/GameSocketR3Extensions.cs` — Observable обёртки для IGameSocket events
+- `Runtime/Integrations/MessagePipe/GameSocketMessagePipeExtensions.cs` — Pub/Sub адаптеры для WS событий
 
 ---
 
@@ -185,12 +192,12 @@
 
 | Phase | Sample | Методы с [ContextMenu] |
 |-------|--------|----------------------|
-| 2 | `Samples/Auth/AuthExample.cs` | RegisterUsername, RegisterEmail, RegisterDevice, LoginUsername, LoginEmail, LoginDevice, Refresh, Logout, ListSessions, RevokeSession, LinkProvider, UnlinkProvider |
+| 2 | `Samples/Auth/AuthExample.cs` | AuthenticateUsername, AuthenticateEmail, AuthenticateDevice, LoginUsername, LoginEmail, LoginDevice, RefreshSession, Logout, ListSessions, RevokeSession, RevokeAllSessions, LinkProvider, UnlinkProvider |
 | 3 | `Samples/Account/AccountExample.cs` | GetMyAccount, UpdateDisplayName, DeleteAccount, GetUserById, GetUsersBatch |
 | 3 | `Samples/Leaderboard/LeaderboardExample.cs` | SubmitScore, GetTopScores, GetAroundMe, DeleteMyRecord |
-| 4 | `Samples/Chat/ChatExample.cs` | ListChannels, CreateChannel, GetMessages, GetUnread, MarkRead |
-| 4 | `Samples/WebSocket/WebSocketExample.cs` | Connect, Disconnect, SendMessage, JoinChannel, LeaveChannel, SetPresence |
-| 5 | `Samples/Storage/StorageExample.cs` | WriteObjects, ReadObjects, DeleteObject, Search, GetCount |
+| 4 | `Samples/Chat/ChatExample.cs` | ListChannels, CreateChannel, ListMessages, GetUnread, MarkChannelRead |
+| 4 | `Samples/WebSocket/WebSocketExample.cs` | Connect, Disconnect, SendMessage, UpdateMessage, DeleteMessage, JoinChannel, LeaveChannel, GetMembers, SetPresence, SubscribePresence, UnsubscribePresence |
+| 5 | `Samples/Storage/StorageExample.cs` | WriteStorageObjects, ReadStorageObjects, DeleteStorageObject, SearchStorageObjects, CountStorageObjects |
 | 5 | `Samples/Friends/FriendsExample.cs` | SendRequest, AcceptRequest, RejectRequest, RemoveFriend, Block, Unblock, ListFriends, ListIncoming, ListOutgoing, ListBlocked |
 | 5 | `Samples/Groups/GroupsExample.cs` | CreateGroup, UpdateGroup, DeleteGroup, JoinGroup, RequestJoin, AcceptRequest, RejectRequest, ListRequests, KickMember, PromoteMember, DemoteMember, LeaveGroup, ListMembers, SearchGroups, ListMyGroups |
 | 5 | `Samples/Notifications/NotificationsExample.cs` | ListNotifications, GetUnreadCount, MarkAsRead, DeleteNotification |
@@ -295,7 +302,7 @@ Core  ←──  Transport  ←──  Api
 |-------|-------------|
 | 0 | `read_console` — 0 ошибок компиляции |
 | 1 | `run_tests` EditMode — тесты десериализации моделей Green |
-| 2 | `run_tests` EditMode — Auth тесты Green. E2E: создать GameClient → RegisterUsername → проверить Session.UserId != null → Logout |
+| 2 | `run_tests` EditMode — Auth тесты Green. E2E: создать GameClient → AuthenticateUsername → проверить Session.UserId != null → Logout |
 | 3 | `run_tests` EditMode — Account + Leaderboard тесты Green. E2E: Login → GetAccount → UpdateAccount(displayName) → WriteLeaderboardRecord → ListLeaderboardRecords → проверить score |
 | 4 | `run_tests` EditMode + PlayMode — WS тесты Green. E2E: Login → NewSocket → Connect → JoinChannel → SendChatMessage → проверить ReceivedChatMessage event → Close |
 | 5 | `run_tests` EditMode — все ~114 тестов Green. E2E: полный цикл Storage (write→read→delete), Friends (add→accept→list→remove), Groups (create→join→leave→delete) |
@@ -320,14 +327,14 @@ Core  ←──  Transport  ←──  Api
 /// 1. Создайте пустой GameObject в сцене
 /// 2. Добавьте компонент AuthExample
 /// 3. В Inspector задайте Host, Port (или оставьте по умолчанию)
-/// 4. Правый клик на компоненте → GameBackend → RegisterUsername
-/// 5. Проверьте Console: "Registered as {userId}"
+/// 4. Правый клик на компоненте → GameBackend → AuthenticateUsername
+/// 5. Проверьте Console: "Authenticated as {userId}"
 /// 6. Правый клик → GameBackend → ListSessions — должна показать 1 сессию
 /// 7. Правый клик → GameBackend → Logout — "Logged out"
 ///
 /// Ожидаемые ошибки:
 /// - "401 Unauthorized" при вызове методов без авторизации
-/// - "409 Conflict" при повторной регистрации того же username
+/// - "409 Conflict" при повторной аутентификации того же username
 /// </summary>
 ```
 

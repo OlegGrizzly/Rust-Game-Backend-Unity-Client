@@ -74,9 +74,9 @@ ssh -i $VPS_SSH_KEY_PATH -p $VPS_PORT $VPS_USER@$VPS_HOST "curl -s ..."
 |-------|-------------|
 | 0 | `read_console` — 0 ошибок компиляции |
 | 1 | `run_tests` EditMode — тесты десериализации моделей Green |
-| 2 | `run_tests` EditMode — Auth тесты Green. E2E: GameClient → RegisterUsername → Session.UserId != null → Logout |
+| 2 | `run_tests` EditMode — Auth тесты Green. E2E: GameClient → AuthenticateUsername → Session.UserId != null → Logout |
 | 3 | `run_tests` EditMode — Account + Leaderboard. E2E: Login → GetAccount → WriteLeaderboardRecord → ListLeaderboardRecords |
-| 4 | `run_tests` EditMode + PlayMode — WS тесты. E2E: Login → NewSocket → Connect → SendChatMessage → ReceivedChatMessage |
+| 4 | `run_tests` EditMode + PlayMode — WS тесты. E2E: Login → NewSocket → Connect → JoinChannel → SendChatMessage → ReceivedChatMessage → Close |
 | 5 | `run_tests` EditMode — все ~114 тестов Green. E2E: Storage, Friends, Groups полный цикл |
 | 6 | `run_tests` EditMode — все тесты Green. Проверить Settings window |
 
